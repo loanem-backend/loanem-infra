@@ -14,6 +14,10 @@ services:
     depends_on:
       - auth-service
 
+  migrate:
+    image: migrate/migrate
+    profiles: ["manual"]
+
   auth-db:
     image: postgres:15-alpine
     container_name: loanem_auth_db
