@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ../api-gateway   
+      dockerfile: Dockerfile
+      secrets:
+        - GITHUB_TOKEN
+    ports:
+      - "${PORT_API}:${PORT_API}"
+    environment:
+      - AUTH_SERV_ADDR=auth-service:${PORT_AUTH}
+    depends_on:
+      - auth-service
+
+  auth-db:
+    image: postgres:15-alpine
+    container_name: loanem_auth_db
+    environment:
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASS}
+      POSTGRES_DB: ${AUTH_DB_NAME}
+    ports:
+      - "54321:${AUTH_DB_PORT}"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+
+  auth-service:
+    build:
+      context: ../auth-service
+      dockerfile: Dockerfile
+      secrets:
+        - GITHUB_TOKEN
+    ports:
+      - "${PORT_AUTH}:${PORT_AUTH}"
+    environment:
+      - APP_PORT=${PORT_AUTH}
+      - DB_HOST=${AUTH_DB_HOST}
+      - DB_PORT=${AUTH_DB_PORT}
+      - DB_USER=${AUTH_DB_USER}
+      - DB_PASS=${AUTH_DB_PASS}
+      - DB_NAME=${AUTH_DB_NAME}
+    depends_on:
+      - auth-db
+
+volumes:
+  auth_db_data:
+
+secrets:
+  GITHUB_TOKEN:
+    environment: GITHUB_TOKEN
+    
