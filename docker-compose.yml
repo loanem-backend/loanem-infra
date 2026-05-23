@@ -10,7 +10,9 @@ services:
     ports:
       - "${PORT_API}:${PORT_API}"
     environment:
-      - AUTH_SERV_ADDR=auth-service:${PORT_AUTH}
+      - APP_PORT=${PORT_API}
+      - AUTH_SERV_ADDR=auth-service
+      - AUTH_SERV_PORT=${PORT_AUTH}
     depends_on:
       - auth-service
 
