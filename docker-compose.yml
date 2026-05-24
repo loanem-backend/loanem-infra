@@ -47,6 +47,9 @@ services:
       - DB_USER=${AUTH_DB_USER}
       - DB_PASS=${AUTH_DB_PASS}
       - DB_NAME=${AUTH_DB_NAME}
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
+    volumes:
+      - ./secrets/auth:/run/secrets/auth:ro
     depends_on:
       - auth-db
 
