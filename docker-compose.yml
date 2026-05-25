@@ -13,6 +13,8 @@ services:
       - APP_PORT=${PORT_API}
       - AUTH_SERV_ADDR=auth-service
       - AUTH_SERV_PORT=${PORT_AUTH}
+      - INVENTORY_SERV_ADDR=inventory-service
+      - INVENTORY_SERV_PORT=${PORT_INVENTORY}
     depends_on:
       - auth-service
 
@@ -22,7 +24,7 @@ services:
 
   auth-db:
     image: postgres:15-alpine
-    container_name: loanem_auth_db
+    container_name: loanem-auth-db
     environment:
       POSTGRES_USER: ${AUTH_DB_USER}
       POSTGRES_PASSWORD: ${AUTH_DB_PASS}
@@ -49,13 +51,45 @@ services:
       - DB_NAME=${AUTH_DB_NAME}
       - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
       - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - JWT_EXPIRE=${JWT_EXPIRE}
     volumes:
       - ./secrets/auth:/run/secrets/auth:ro
     depends_on:
       - auth-db
 
+  inventory-db:
+    image: postgres:15-alpine
+    container_name: loanem-inventory-db
+    environment:
+      POSTGRES_USER: ${INVENTORY_DB_USER}
+      POSTGRES_PASSWORD: ${INVENTORY_DB_PASS}
+      POSTGRES_DB: ${INVENTORY_DB_NAME}
+    ports:
+      - "54322:${INVENTORY_DB_PORT}"
+    volumes:
+      - inventory_db_data:/var/lib/postgresql/data
+
+  inventory-service:
+    build:
+      context: ../inventory-service
+      dockerfile: Dockerfile
+      secrets:
+        - GITHUB_TOKEN
+    ports:
+      - "${PORT_INVENTORY}:${PORT_INVENTORY}"
+    environment:
+      - APP_PORT=${PORT_INVENTORY}
+      - DB_HOST=${INVENTORY_DB_HOST}
+      - DB_PORT=${INVENTORY_DB_PORT}
+      - DB_USER=${INVENTORY_DB_USER}
+      - DB_PASS=${INVENTORY_DB_PASS}
+      - DB_NAME=${INVENTORY_DB_NAME}
+    depends_on:
+      - inventory-db
+
 volumes:
   auth_db_data:
+  inventory_db_data:
 
 secrets:
   GITHUB_TOKEN:
