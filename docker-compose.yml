@@ -57,6 +57,36 @@ services:
     depends_on:
       - auth-db
 
+  course-db:
+    image: postgres:15-alpine
+    container_name: loanem-course-db
+    environment:
+      POSTGRES_USER: ${COURSE_DB_USER}
+      POSTGRES_PASSWORD: ${COURSE_DB_PASS}
+      POSTGRES_DB: ${COURSE_DB_NAME}
+    ports:
+      - "54322:${COURSE_DB_PORT}"
+    volumes:
+      - course_db_data:/var/lib/postgresql/data
+
+  course-service:
+    build:
+      context: ../course-service
+      dockerfile: Dockerfile
+      secrets:
+        - GITHUB_TOKEN
+    ports:
+      - "${PORT_COURSE}:${PORT_COURSE}"
+    environment:
+      - APP_PORT=${PORT_COURSE}
+      - DB_HOST=${COURSE_DB_HOST}
+      - DB_PORT=${COURSE_DB_PORT}
+      - DB_USER=${COURSE_DB_USER}
+      - DB_PASS=${COURSE_DB_PASS}
+      - DB_NAME=${COURSE_DB_NAME}
+    depends_on:
+      - course-db
+
   inventory-db:
     image: postgres:15-alpine
     container_name: loanem-inventory-db
@@ -65,7 +95,7 @@ services:
       POSTGRES_PASSWORD: ${INVENTORY_DB_PASS}
       POSTGRES_DB: ${INVENTORY_DB_NAME}
     ports:
-      - "54322:${INVENTORY_DB_PORT}"
+      - "54323:${INVENTORY_DB_PORT}"
     volumes:
       - inventory_db_data:/var/lib/postgresql/data
 
@@ -89,6 +119,7 @@ services:
 
 volumes:
   auth_db_data:
+  course_db_data:
   inventory_db_data:
 
 secrets:
