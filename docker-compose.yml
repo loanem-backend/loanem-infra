@@ -13,6 +13,8 @@ services:
       - APP_PORT=${PORT_API}
       - AUTH_SERV_ADDR=auth-service
       - AUTH_SERV_PORT=${PORT_AUTH}
+      - COURSE_SERV_ADDR=course-service
+      - COURSE_SERV_PORT=${PORT_COURSE}
       - INVENTORY_SERV_ADDR=inventory-service
       - INVENTORY_SERV_PORT=${PORT_INVENTORY}
     depends_on:
@@ -29,8 +31,6 @@ services:
       POSTGRES_USER: ${AUTH_DB_USER}
       POSTGRES_PASSWORD: ${AUTH_DB_PASS}
       POSTGRES_DB: ${AUTH_DB_NAME}
-    ports:
-      - "54321:${AUTH_DB_PORT}"
     volumes:
       - auth_db_data:/var/lib/postgresql/data
 
@@ -40,8 +40,6 @@ services:
       dockerfile: Dockerfile
       secrets:
         - GITHUB_TOKEN
-    ports:
-      - "${PORT_AUTH}:${PORT_AUTH}"
     environment:
       - APP_PORT=${PORT_AUTH}
       - DB_HOST=${AUTH_DB_HOST}
@@ -64,8 +62,6 @@ services:
       POSTGRES_USER: ${COURSE_DB_USER}
       POSTGRES_PASSWORD: ${COURSE_DB_PASS}
       POSTGRES_DB: ${COURSE_DB_NAME}
-    ports:
-      - "54322:${COURSE_DB_PORT}"
     volumes:
       - course_db_data:/var/lib/postgresql/data
 
@@ -75,8 +71,6 @@ services:
       dockerfile: Dockerfile
       secrets:
         - GITHUB_TOKEN
-    ports:
-      - "${PORT_COURSE}:${PORT_COURSE}"
     environment:
       - APP_PORT=${PORT_COURSE}
       - DB_HOST=${COURSE_DB_HOST}
@@ -94,8 +88,6 @@ services:
       POSTGRES_USER: ${INVENTORY_DB_USER}
       POSTGRES_PASSWORD: ${INVENTORY_DB_PASS}
       POSTGRES_DB: ${INVENTORY_DB_NAME}
-    ports:
-      - "54323:${INVENTORY_DB_PORT}"
     volumes:
       - inventory_db_data:/var/lib/postgresql/data
 
@@ -105,8 +97,6 @@ services:
       dockerfile: Dockerfile
       secrets:
         - GITHUB_TOKEN
-    ports:
-      - "${PORT_INVENTORY}:${PORT_INVENTORY}"
     environment:
       - APP_PORT=${PORT_INVENTORY}
       - DB_HOST=${INVENTORY_DB_HOST}
