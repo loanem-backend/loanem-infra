@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3.13
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api-gateway:
     build:
       context: ../api-gateway   
@@ -19,6 +36,8 @@ services:
       - INVENTORY_SERV_PORT=${PORT_INVENTORY}
     depends_on:
       - auth-service
+      - course-service
+      - inventory-service
 
   migrate:
     image: migrate/migrate
@@ -78,8 +97,16 @@ services:
       - DB_USER=${COURSE_DB_USER}
       - DB_PASS=${COURSE_DB_PASS}
       - DB_NAME=${COURSE_DB_NAME}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
     depends_on:
-      - course-db
+      course-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
 
   inventory-db:
     image: postgres:15-alpine
@@ -111,6 +138,7 @@ volumes:
   auth_db_data:
   course_db_data:
   inventory_db_data:
+  rabbitmq_data:
 
 secrets:
   GITHUB_TOKEN:
