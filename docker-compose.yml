@@ -131,8 +131,15 @@ services:
       - DB_USER=${INVENTORY_DB_USER}
       - DB_PASS=${INVENTORY_DB_PASS}
       - DB_NAME=${INVENTORY_DB_NAME}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
     depends_on:
-      - inventory-db
+      inventory-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   auth_db_data:
