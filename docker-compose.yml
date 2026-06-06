@@ -141,10 +141,44 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  participant-db:
+    image: postgres:15-alpine
+    container_name: loanem-participant-db
+    environment:
+      POSTGRES_USER: ${PARTICIPANT_DB_USER}
+      POSTGRES_PASSWORD: ${PARTICIPANT_DB_PASS}
+      POSTGRES_DB: ${PARTICIPANT_DB_NAME}
+    volumes:
+      - participant_db_data:/var/lib/postgresql/data
+
+  participant-service:
+    build:
+      context: ../participant-service
+      dockerfile: Dockerfile
+      secrets:
+        - GITHUB_TOKEN
+    environment:
+      - APP_PORT=${PORT_PARTICIPANT}
+      - DB_HOST=${PARTICIPANT_DB_HOST}
+      - DB_PORT=${PARTICIPANT_DB_PORT}
+      - DB_USER=${PARTICIPANT_DB_USER}
+      - DB_PASS=${PARTICIPANT_DB_PASS}
+      - DB_NAME=${PARTICIPANT_DB_NAME}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
+    depends_on:
+      participant-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   auth_db_data:
   course_db_data:
   inventory_db_data:
+  participant_db_data:
   rabbitmq_data:
 
 secrets:
