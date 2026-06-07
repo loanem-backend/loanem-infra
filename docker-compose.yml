@@ -34,10 +34,13 @@ services:
       - COURSE_SERV_PORT=${PORT_COURSE}
       - INVENTORY_SERV_ADDR=inventory-service
       - INVENTORY_SERV_PORT=${PORT_INVENTORY}
+      - PARTICIPANT_SERV_ADDR=participant-service
+      - PARTICIPANT_SERV_PORT=${PORT_PARTICIPANT}
     depends_on:
       - auth-service
       - course-service
       - inventory-service
+      - participant-service
 
   migrate:
     image: migrate/migrate
