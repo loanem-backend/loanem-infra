@@ -36,6 +36,8 @@ services:
       - INVENTORY_SERV_PORT=${PORT_INVENTORY}
       - PARTICIPANT_SERV_ADDR=participant-service
       - PARTICIPANT_SERV_PORT=${PORT_PARTICIPANT}
+      - STORAGE_REGION=${S3_STORAGE_REGION}
+      - STORAGE_BUCKET=${S3_STORAGE_BUCKET}
     depends_on:
       - auth-service
       - course-service
