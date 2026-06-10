@@ -18,6 +18,15 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis_data:/data
+    restart: always
+
   api-gateway:
     build:
       context: ../api-gateway   
@@ -36,6 +45,8 @@ services:
       - INVENTORY_SERV_PORT=${PORT_INVENTORY}
       - PARTICIPANT_SERV_ADDR=participant-service
       - PARTICIPANT_SERV_PORT=${PORT_PARTICIPANT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - STORAGE_REGION=${S3_STORAGE_REGION}
       - STORAGE_BUCKET=${S3_STORAGE_BUCKET}
     depends_on:
@@ -73,11 +84,17 @@ services:
       - DB_NAME=${AUTH_DB_NAME}
       - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
       - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_EXPIRE=${JWT_EXPIRE}
+      - JWT_ACCESS_EXPIRE=${JWT_ACCESS_EXPIRE}
+      - JWT_REFRESH_EXPIRE=${JWT_REFRESH_EXPIRE}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PASS=${REDIS_PASS}
+      - REDIS_DB=${REDIS_DB}
     volumes:
       - ./secrets/auth:/run/secrets/auth:ro
     depends_on:
       - auth-db
+      - redis
 
   course-db:
     image: postgres:15-alpine
@@ -140,6 +157,10 @@ services:
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASS=${RABBITMQ_PASS}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - STORAGE_REGION=${S3_STORAGE_REGION}
+      - STORAGE_BUCKET=${S3_STORAGE_BUCKET}
     depends_on:
       inventory-db:
         condition: service_started
@@ -185,6 +206,7 @@ volumes:
   inventory_db_data:
   participant_db_data:
   rabbitmq_data:
+  redis_data:
 
 secrets:
   GITHUB_TOKEN:
