@@ -90,6 +90,8 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PASS=${REDIS_PASS}
       - REDIS_DB=${REDIS_DB}
+      - BASE_URL=${BASE_URL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
       - ./secrets/auth:/run/secrets/auth:ro
     depends_on:
